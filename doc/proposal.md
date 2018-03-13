@@ -2,17 +2,36 @@ Mongo and flask restful/restplus
 
 Collection for each vlan and subnet
 
-DB Schema
-```json
+## DB Schema
+Collection `vlan_<X>`
+```
 {
     "mac": <mac-address>,
     "ip": [<address>],
     "hostname": <hostname>,
     "last-seen": <unix-time>,
+    "uptime": <>
     "name": <name>
 }
 ```
 
+Collection `users`
+```
+{
+    "user": <str>
+    "pass": <salted hash>
+}
+```
+
+Collection `keys`
+```
+{
+    "keyphrase": <str>
+    "vlan": []
+    "user": <_id>
+    "expiry": <unix time>
+}
+```
 
 `/api/1.0/scans`
 - view monitored vlans (get)
