@@ -10,7 +10,7 @@ Collection `vlan_<X>`
     "ip": [<address>],
     "hostname": <hostname>,
     "last-seen": <unix-time>,
-    "uptime": <>
+    "uptime": <minutes>,
     "name": <name>
 }
 ```
@@ -18,17 +18,18 @@ Collection `vlan_<X>`
 Collection `users`
 ```
 {
-    "user": <str>
-    "pass": <salted hash>
+    "user": <str>,
+    "pass": <salted hash>,
+    "salt": <random string>
 }
 ```
 
 Collection `keys`
 ```
 {
-    "keyphrase": <str>
-    "vlan": []
-    "user": <_id>
+    "keyphrase": <str>,
+    "vlan": [],
+    "user": <_id>,
     "expiry": <unix time>
 }
 ```
