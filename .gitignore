@@ -1,2 +1,4 @@
 env
 .scanrc
+/api/config.json
+__pycache__

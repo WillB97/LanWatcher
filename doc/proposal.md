@@ -3,7 +3,8 @@ Mongo and flask restful/restplus
 Collection for each vlan and subnet
 
 ## DB Schema
-Collection `vlan_<X>`
+Collection `vlan_<X>`  
+Indexed by `mac` & `hostname`
 ```
 {
     "mac": <mac-address>,
@@ -15,7 +16,8 @@ Collection `vlan_<X>`
 }
 ```
 
-Collection `users`
+Collection `users`  
+Indexed by `user`
 ```
 {
     "user": <str>,
@@ -24,12 +26,13 @@ Collection `users`
 }
 ```
 
-Collection `keys`
+Collection `keys`  
+Indexed by `keyphrase`
 ```
 {
     "keyphrase": <str>,
     "vlan": [],
-    "user": <_id>,
+    "user": <username>,
     "expiry": <unix time>
 }
 ```
