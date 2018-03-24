@@ -59,7 +59,10 @@ class vlan_endpoint(Resource):
             return auth
         records = self.db['vlan_' + args['vlan']].find({},
                 {'_id': 0, 'last-seen': 0, 'uptime': 0}) # fetch all of a vlan
-        result = {'data': list(records)} # format data (dictionary by ip)
+        result = {} # format data (dictionary by ip)
+        for record in records:
+            for ip in record['ip']:
+                result[ip] = {k:v for k,v in record.items() if k not in ['ip']}
         return result
 
     def post(self, vlan):
