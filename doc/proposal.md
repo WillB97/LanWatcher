@@ -4,7 +4,7 @@ Collection for each vlan and subnet
 
 ## DB Schema
 Collection `vlan_<X>`  
-Indexed by `mac` & `hostname`
+Indexed by `mac` & `last-seen`
 ```
 {
     "mac": <mac-address>,

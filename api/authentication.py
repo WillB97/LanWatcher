@@ -24,7 +24,7 @@ class login_endpoint(Resource):
         # Fetch record from database
         record = self.users.find_one({'user': args['username']})  # retrieve record from database
         if record is None:
-            return {'auth-token': None}, 403
+            return {'token': None}, 403
         # Test for password match
         pass_hash = hashlib.sha256(
             str(args['password'] + record['salt']).encode('utf-8')).hexdigest()
@@ -130,11 +130,12 @@ class keys_endpoint(Resource):
         return {'token': token}, 201
 
     def delete(self):
-        putParse = reqparse.RequestParser()
-        putParse.add_argument('keyphrase', required=True, location='form',
+        delParse = reqparse.RequestParser()
+        delParse.add_argument('keyphrase', required=True, location='form',
                                 nullable=False, type=inputs.regex(r'^[A-Z0-9]{16}$'))
+        delParse.add_argument('confirm', required=True, location='form', choices=['true'])
         auth = self.auth_test({}, request.cookies, '') # test auth
-        args = putParse.parse_args()
+        args = delParse.parse_args()
         if auth != True:
             return auth
         user = jwt.decode(request.cookies['token'], self.auth_secret, algorithm='HS256').get('user')
