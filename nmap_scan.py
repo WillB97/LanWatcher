@@ -1,4 +1,4 @@
-import pprint 
+#import pprint 
 import json
 from datetime import datetime
 import subprocess
@@ -6,8 +6,9 @@ import sys
 from xmljson import badgerfish as bf
 from xml.etree.ElementTree import fromstring
 from ipaddress import ip_network
+import requests
 
-def nmap_scan(ipRange):
+def nmap_scan(ipRange, vlan, key, base_url):
     p = subprocess.Popen(['sudo','nmap','-oX','-','-sn','-R',ipRange],
                                 bufsize=10000,stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -23,7 +24,7 @@ def nmap_scan(ipRange):
     if type(temp_json['nmaprun']['host']) != list:
         temp_json['nmaprun']['host'] = [ temp_json['nmaprun']['host'] ]
 
-    pp = pprint.PrettyPrinter()
+    #pp = pprint.PrettyPrinter()
     timeval = int(datetime.utcnow().timestamp())
     data = []
     for y in range(0,temp_json['nmaprun']['runstats']['hosts']['@up']):
@@ -49,14 +50,20 @@ def nmap_scan(ipRange):
         device_data['last-seen'] = timeval
         data.append(device_data)
 
-    pp.pprint(data)
+    #pp.pprint(data)
+    r = requests.put(base_url + '/api/1.0/scans/' + vlan, json=data, headers={'auth-token': key})
+    print(r.json())
 
 scanRange = None
 try:
     with open('.scanrc') as fs:
         configData = json.load(fs)
-        scanRange = configData['ip_range']
-        ip_network(scanRange, strict=False)
+        vlan = configData['vlan']
+        key = configData['key']
+        base_url = configData['url']
+        scanRange = configData.get('ip_range')
+        if scanRange is not None:
+            ip_network(scanRange, strict=False)
 except FileNotFoundError:
     pass
 except json.JSONDecodeError:
@@ -64,7 +71,7 @@ except json.JSONDecodeError:
 except ValueError:
     print('Invalid IP network in config', file=sys.stderr)
 except KeyError:
-    print('IP network not specified in config', file=sys.stderr)
+    print('Missing VLAN and API key in config', file=sys.stderr)
 
 if len(sys.argv) == 2:
     try:
@@ -77,4 +84,4 @@ if scanRange is None:
     print('Scan range missing', file=sys.stderr)
     exit()
 
-nmap_scan(scanRange)
+nmap_scan(scanRange, vlan, key, base_url)

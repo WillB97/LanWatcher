@@ -75,7 +75,7 @@ class keys_endpoint(Resource):
     def post(self):
         postParse = reqparse.RequestParser()
         postParse.add_argument('vlan', required=True, location='form', action='append',
-                                nullable=False, type=inputs.regex(r'^[A-Za-z0-9 ]{1,32}$'))
+                                nullable=False, type=inputs.regex(r'^[A-Za-z0-9]{1,32}$'))
         postParse.add_argument('expiry', required=False, location='form', type=int)
         auth = self.auth_test({}, request.cookies, '') # test auth
         args = postParse.parse_args()
@@ -93,14 +93,14 @@ class keys_endpoint(Resource):
             token_data['exp'] = datetime.utcnow() + timedelta(hours=args['expiry']) # Add expiry to token
         self.keys.insert_one(key) # insert key into database
         token = jwt.encode(token_data, self.auth_secret, algorithm='HS256').decode("utf-8") # return key and ID
-        return {'token': token, 'keyphrase': keyphrase}, 201
+        return {'auth-token': token, 'keyphrase': keyphrase}, 201
 
     def put(self):
         putParse = reqparse.RequestParser()
         putParse.add_argument('keyphrase', required=True, location='form',
                                 nullable=False, type=inputs.regex(r'^[A-Z0-9]{16}$'))
         putParse.add_argument('vlan', required=False, location='form', action='append',
-                                nullable=False, type=inputs.regex(r'^[A-Za-z0-9 ]{1,32}$'))
+                                nullable=False, type=inputs.regex(r'^[A-Za-z0-9]{1,32}$'))
         putParse.add_argument('expiry', required=False, location='form', type=int)
         auth = self.auth_test({}, request.cookies, '') # test auth
         args = putParse.parse_args()
@@ -110,12 +110,13 @@ class keys_endpoint(Resource):
         record = self.keys.find_one({'user': user, 'keyphrase': args['keyphrase']})# check key exists for that user
         if record is None:
             return {'token': None}, 404
+        record_data = None
         token_data = {'key': args['keyphrase'],
                 'nbf': datetime.utcnow(), # Not usable before now
                 'iat': datetime.utcnow()} # Issued at
         if args['expiry'] != None and args['expiry'] >= 0:
             if args['expiry'] == 0:
-                record_data = {'expiry': args['expiry']}
+                record_data = {'expiry': 0}
             else:
                 start_time = jwt.decode(request.cookies['token'], self.auth_secret, algorithm='HS256').get('iat')
                 end_time = datetime.fromtimestamp(start_time) + timedelta(hours=args['expiry'])
@@ -125,9 +126,10 @@ class keys_endpoint(Resource):
             token_data['exp'] = datetime.fromtimestamp(record['expiry']) # Add expiry to token
         if args['vlan'] is not None:
             record_data = {'vlan': args['vlan']}
-        self.keys.update_one({'user': user, 'keyphrase': args['keyphrase']}, {'$set': record_data}) # update record
+        if record_data:
+            self.keys.update_one({'user': user, 'keyphrase': args['keyphrase']}, {'$set': record_data}) # update record
         token = jwt.encode(token_data, self.auth_secret, algorithm='HS256').decode("utf-8") # generate new key
-        return {'token': token}, 201
+        return {'auth-token': token}, 201
 
     def delete(self):
         delParse = reqparse.RequestParser()
@@ -173,9 +175,9 @@ class Auth:
             try: # verify and decode token
                 user = jwt.decode(user_key, self.auth_secret, algorithm='HS256')['user']
             except jwt.exceptions.ExpiredSignatureError:
-                return {'message': 'invalid API key'}, 403
+                return {'message': 'invalid user key'}, 403
             except (jwt.exceptions.InvalidTokenError, KeyError):
-                return {'message': 'invalid API key'}, 500
+                return {'message': 'invalid user key'}, 500
             if self.users.count({'user': user}): # test if user exists in users
                 return True
         return {'message': 'unauthorised'}, 403
