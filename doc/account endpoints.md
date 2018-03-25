@@ -6,8 +6,8 @@ URI: `/api/1.0/login`
 Generate user authentication token from credentials
 ```
 args: {
-    "username": < string >,
-    "password": < alphanumeric >
+    "username": < alphanumeric >,
+    "password": < string >
 },
 response: {
     "token": < jwt token >
@@ -18,7 +18,7 @@ response: {
 Change the authenticated user's password
 ```
 args: {
-    "password": < alphanumeric >
+    "password": < string >
 },
 response: {
     "success": True
@@ -37,11 +37,11 @@ List the API keys associated with the authenticated user
 args: {},
 response: {
     "data": [
-        "keyphrase": < alphanumeric >,
+        "keyphrase": < hexadecimal >,
         "vlan": [
-            < string >
+            < alphanumeric >
         ],
-        "expiry": < unix timestamp | 0 >
+        "expiry": < float(unix time) | 0 >
     ]
 }, 200
 ```
@@ -50,13 +50,13 @@ response: {
 Generate a new API key and associate it with the authenticated user
 ```
 args: {
-    "expiry": < int >,
-    "vlan": < string >,
+    "expiry": < float(unix time) >,
+    "vlan": < alphanumeric >,
     "vlan": ...
 },
 response: {
     "token": < jwt token >,
-    "keyphrase": < alphanumeric >
+    "keyphrase": < hexadecimal >
 }, 201
 ```
 
@@ -65,9 +65,9 @@ Alter a pre-existing API key, add and remove VLANs and expiry.
 ```
 args: {
     "keyphrase": < alphanumeric >,
-    "expiry": < int >,  // Optional
-    "vlan": < string >, // Optional
-    "vlan": ...         // Optional
+    "expiry": < float(unix time) >, // Optional
+    "vlan": < alphanumeric >,     // Optional
+    "vlan": ...                   // Optional
 },
 response: {
     "token": < jwt token >
@@ -78,7 +78,7 @@ response: {
 Remove an API key associated with the authenticated user
 ```
 args: {
-    "keyphrase": < alphanumeric >,
+    "keyphrase": < hexadecimal >,
     "confirm": "true"
 },
 response: {

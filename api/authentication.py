@@ -76,7 +76,7 @@ class keys_endpoint(Resource):
         postParse = reqparse.RequestParser()
         postParse.add_argument('vlan', required=True, location='form', action='append',
                                 nullable=False, type=inputs.regex(r'^[A-Za-z0-9]{1,32}$'))
-        postParse.add_argument('expiry', required=False, location='form', type=int)
+        postParse.add_argument('expiry', required=False, location='form', type=float)
         auth = self.auth_test({}, request.cookies, '') # test auth
         args = postParse.parse_args()
         if auth != True:
@@ -98,10 +98,10 @@ class keys_endpoint(Resource):
     def put(self):
         putParse = reqparse.RequestParser()
         putParse.add_argument('keyphrase', required=True, location='form',
-                                nullable=False, type=inputs.regex(r'^[A-Z0-9]{16}$'))
+                                nullable=False, type=inputs.regex(r'^[A-F0-9]{16}$'))
         putParse.add_argument('vlan', required=False, location='form', action='append',
                                 nullable=False, type=inputs.regex(r'^[A-Za-z0-9]{1,32}$'))
-        putParse.add_argument('expiry', required=False, location='form', type=int)
+        putParse.add_argument('expiry', required=False, location='form', type=float)
         auth = self.auth_test({}, request.cookies, '') # test auth
         args = putParse.parse_args()
         if auth != True:
@@ -134,7 +134,7 @@ class keys_endpoint(Resource):
     def delete(self):
         delParse = reqparse.RequestParser()
         delParse.add_argument('keyphrase', required=True, location='form',
-                                nullable=False, type=inputs.regex(r'^[A-Z0-9]{16}$'))
+                                nullable=False, type=inputs.regex(r'^[A-F0-9]{16}$'))
         delParse.add_argument('confirm', required=True, location='form', choices=['true'])
         auth = self.auth_test({}, request.cookies, '') # test auth
         args = delParse.parse_args()

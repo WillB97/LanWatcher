@@ -16,7 +16,8 @@ class ip_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find({'ip': ip},{'_id': 0,'ip':0}, sort=[('mac',pymongo.ASCENDING)])
+        record = self.db['vlan_' + vlan].find({'ip': ip}, {'_id':0, 'mac':1, 'hostname':1,
+                    'last-seen':1, 'name':1}, sort=[('mac',pymongo.ASCENDING)])
         if record.count() == 0:
             return {'error': "IP address not found"}, 404
         return {'ip': list(record)}
@@ -32,7 +33,7 @@ class ip_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'mac': args['mac'], 'ip': ip},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'mac': args['mac'], 'ip': ip},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "MAC/IP address pair not found"}, 404
         result = self.db['vlan_' + vlan].update_one({'mac': args['mac'], 'ip': ip},
@@ -52,7 +53,7 @@ class ip_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'mac': args['mac'], 'ip': ip},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'mac': args['mac'], 'ip': ip},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "MAC/IP address pair not found"}, 404
         result = self.db['vlan_' + vlan].delete_one({'mac': args['mac'], 'ip': ip})
@@ -74,7 +75,8 @@ class mac_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'mac': mac}, {'_id': 0, 'mac': 0})
+        record = self.db['vlan_' + vlan].find_one({'mac': mac}, {'_id': 0,
+                    'ip': 1, 'hostname':1, 'last-seen':1, 'name':1})
         if record is None:
             return {'error': "MAC address not found"}, 404
         return record
@@ -88,7 +90,7 @@ class mac_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'mac': mac},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'mac': mac},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "MAC address not found"}, 404
         result = self.db['vlan_' + vlan].update_one({'mac': mac},{'$set': {'name': args['name']}})
@@ -105,7 +107,7 @@ class mac_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'mac': mac},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'mac': mac},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "MAC address not found"}, 404
         result = self.db['vlan_' + vlan].delete_one({'mac': mac})
@@ -127,7 +129,8 @@ class host_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 0, 'hostname':0})
+        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 0,
+                    'ip': 1, 'mac':1, 'last-seen':1, 'name':1})
         if record is None:
             return {'error': "hostname not found"}, 404
         return record
@@ -141,7 +144,7 @@ class host_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "hostname not found"}, 404
         result = self.db['vlan_' + vlan].update_one({'hostname': host},{'$set': {'name': args['name']}})
@@ -158,7 +161,7 @@ class host_endpoint(Resource):
         auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
         if auth != True:
             return auth
-        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 0}) # test record exists
+        record = self.db['vlan_' + vlan].find_one({'hostname': host},{'_id': 1}) # test record exists
         if record is None:
             return {'error': "hostname not found"}, 404
         result = self.db['vlan_' + vlan].delete_one({'hostname': host})

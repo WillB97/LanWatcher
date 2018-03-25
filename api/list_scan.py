@@ -58,7 +58,7 @@ class vlan_endpoint(Resource):
         if auth != True:
             return auth
         records = self.db['vlan_' + args['vlan']].find({},
-                {'_id': 0, 'last-seen': 0, 'uptime': 0}) # fetch all of a vlan
+                {'_id': 0, 'ip': 1, 'mac': 1, 'hostname': 1, 'name': 1}) # fetch all of a vlan
         result = {} # format data (dictionary by ip)
         for record in records:
             for ip in record['ip']:

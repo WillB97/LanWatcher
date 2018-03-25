@@ -9,10 +9,9 @@ args: {},
 response: {
     "ip": [
         "mac": < MAC address >,
-        "hostname": < string >,
-        "last-seen": < unix timestamp >,
-        "name": < string >,
-        "uptime": < int >
+        "hostname": < FQDN >,
+        "last-seen": < float(unix time) >,
+        "name": < string >
     ]
 }, 200
 ```
@@ -54,9 +53,8 @@ response: {
     "ip": [
         < IP address >
     ],
-    "last-seen": < unix timestamp >,
-    "name": < string >,
-    "uptime": < int >
+    "last-seen": < float(unix time) >,
+    "name": < string >
 }, 200
 ```
 #### PUT
@@ -95,9 +93,8 @@ response: {
     "ip": [
         < IP address >
     ],
-    "last-seen": < unix timestamp >,
-    "name": < string >,
-    "uptime": < int >
+    "last-seen": < float(unix time) >,
+    "name": < string >
 }, 200
 ```
 #### PUT
