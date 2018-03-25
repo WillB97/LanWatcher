@@ -33,7 +33,10 @@ URI: `/api/1.0/scans/<vlan>`
 #### GET
 List data stored about each occupied IP address
 ```
-args: {},
+args: {
+    "to": < int(unix time) >,   // Optional
+    "from": < int(unix time) >  // Optional
+},
 response: {
     < IP address > : {
         "mac": < MAC address >,

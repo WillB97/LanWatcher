@@ -51,13 +51,23 @@ class vlan_endpoint(Resource):
     def get(self, vlan):
         getParse = reqparse.RequestParser()
         getParse.add_argument('vlan', required=True, location='view_args', nullable=False)
+        getParse.add_argument('to', required=False, location='args', type=int)
+        getParse.add_argument('from', required=False, location='args', type=int)
         args = getParse.parse_args()
         if 'vlan_' + args['vlan'] not in self.db.collection_names(): # test vlan exists
             return {'error': "vlan does not exist"}, 404
         auth = self.auth_test(request.headers, request.cookies, args['vlan']) # test auth
         if auth != True:
             return auth
-        records = self.db['vlan_' + args['vlan']].find({},
+        find_filter = {}
+        time_filter = {}
+        if args['to'] is not None:
+            time_filter['$lt'] = args['to']
+        if args['from'] is not None:
+            time_filter['$gt'] = args['from']
+        if time_filter is not {}:
+            find_filter = {'last-seen': time_filter}
+        records = self.db['vlan_' + args['vlan']].find(find_filter,
                 {'_id': 0, 'ip': 1, 'mac': 1, 'hostname': 1, 'name': 1}) # fetch all of a vlan
         result = {} # format data (dictionary by ip)
         for record in records:
