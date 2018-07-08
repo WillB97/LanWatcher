@@ -32,7 +32,7 @@ class scan_endpoint(Resource):
         args = postParse.parse_args()
         if auth != True:
             return auth
-        if args['vlan'] in self.db.collection_names(): # test vlan doesn't already exist
+        if 'vlan_' + args['vlan'] in self.db.collection_names(): # test vlan doesn't already exist
             return {'error': 'VLAN already exists'}, 400
         self.db.create_collection('vlan_' + args['vlan']) # create collection
         # add mac and last-seen indexes
@@ -120,7 +120,7 @@ class vlan_endpoint(Resource):
             return {'error': "data must be in a list"}, 400
         records = []
         for device in request.json:
-            if not re.findall(r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$', device.get('mac')): # validate mac
+            if not device.get('mac') or not re.findall(r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$', device.get('mac')): # validate mac
                 continue
             try: # validate IP addresses
                 for ip in device.get('ip'):

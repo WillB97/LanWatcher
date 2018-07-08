@@ -88,7 +88,7 @@ class keys_endpoint(Resource):
         token_data = {'key': keyphrase,
                 'nbf': datetime.utcnow(), # Not usable before now
                 'iat': datetime.utcnow()} # Issued at
-        if args['expiry'] != None and args['expiry'] >= 0:
+        if args['expiry'] != None and args['expiry'] > 0:
             key["expiry"] = (datetime.utcnow() + timedelta(hours=args['expiry'])).timestamp()
             token_data['exp'] = datetime.utcnow() + timedelta(hours=args['expiry']) # Add expiry to token
         self.keys.insert_one(key) # insert key into database
