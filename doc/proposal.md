@@ -12,7 +12,13 @@ Indexed by `mac` & `last-seen`
     "hostname": <hostname>,
     "last-seen": <unix-time>,
     "uptime": <minutes>,
+    "active": <bool>,
     "name": <name>
+}
+{
+    "meta": "true",
+    "uptime-count": <bool>,
+    "max-step":<minutes>
 }
 ```
 
@@ -71,6 +77,16 @@ Indexed by `keyphrase`
 - manually rename device by hostname (put)
     + new name
 - remove device (delete)
+    + confirm deletion
+
+`/api/1.0/scans/<vlan>/manage`
+- set max time between scans without downtime (put)
+    + time in mins
+- toggle uptime being counted (post)
+    + enabled
+- delete ip records in a time range (delete)
+    + before time
+    + after time
     + confirm deletion
 
 `/api/1.0/login`

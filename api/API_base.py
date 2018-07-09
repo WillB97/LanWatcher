@@ -4,7 +4,7 @@ from flask_restful import Api
 from pymongo import MongoClient
 from authentication import login_endpoint, keys_endpoint, Auth
 from list_scan import scan_endpoint, vlan_endpoint
-from scan_item import ip_endpoint, mac_endpoint, host_endpoint
+from scan_item import ip_endpoint, mac_endpoint, host_endpoint, manage_endpoint
 app = Flask(__name__)
 api = Api(app)
 
@@ -26,6 +26,7 @@ api.add_resource(vlan_endpoint, '/api/1.0/scans/<vlan>', resource_class_args=(db
 api.add_resource(ip_endpoint, '/api/1.0/scans/<vlan>/ip/<ip>', resource_class_args=(db, auth_help))
 api.add_resource(mac_endpoint, '/api/1.0/scans/<vlan>/mac/<mac>', resource_class_args=(db, auth_help))
 api.add_resource(host_endpoint, '/api/1.0/scans/<vlan>/host/<host>', resource_class_args=(db, auth_help))
+api.add_resource(manage_endpoint, '/api/1.0/scans/<vlan>/manage', resource_class_args=(db, auth_help))
 
 #fix for flask being behind a proxy
 #from werkzeug.contrib.fixers import ProxyFix

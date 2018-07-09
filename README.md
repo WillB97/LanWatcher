@@ -39,7 +39,7 @@ pip3 install --user -U -r requirements.txt
 python3 create_key.py
 # run initial scan
 python3 nmap_scan.py
-crontab -e
+sudo crontab -e
 ```
 
 In crontab:

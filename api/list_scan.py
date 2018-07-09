@@ -38,6 +38,7 @@ class scan_endpoint(Resource):
         # add mac and last-seen indexes
         self.db['vlan_' + args['vlan']].create_index([('last-seen', pymongo.DESCENDING)])
         self.db['vlan_' + args['vlan']].create_index([('mac', pymongo.DESCENDING)], unique=True)
+        self.db['vlan_' + args['vlan']].insert_one({"meta": "true","max-step": 20,"uptime-count": 'false'})
         return {'success': True}, 201
 
 
@@ -65,12 +66,13 @@ class vlan_endpoint(Resource):
             time_filter['$lt'] = args['to']
         if args['from'] is not None:
             time_filter['$gt'] = args['from']
-        if time_filter is not {}:
+        if time_filter != {}:
             find_filter = {'last-seen': time_filter}
         records = self.db['vlan_' + args['vlan']].find(find_filter,
                 {'_id': 0, 'ip': 1, 'mac': 1, 'hostname': 1, 'name': 1}) # fetch all of a vlan
         result = {} # format data (dictionary by ip)
         for record in records:
+            if record == {}: continue
             for ip in record['ip']:
                 result[ip] = {k:v for k,v in record.items() if k not in ['ip']}
         return result
@@ -119,6 +121,9 @@ class vlan_endpoint(Resource):
         if type(request.json) is not list:
             return {'error': "data must be in a list"}, 400
         records = []
+        result = self.db['vlan_' + vlan].find_one({'meta':'true'})
+        max_step = result['max-step']
+        uptime_enabled = result['uptime-count']
         for device in request.json:
             if not device.get('mac') or not re.findall(r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$', device.get('mac')): # validate mac
                 continue
@@ -135,12 +140,19 @@ class vlan_endpoint(Resource):
                 "mac": device['mac'],
                 "ip": device['ip'],
                 "hostname": device['hostname'],
-                "last-seen": device['last-seen']},
-            '$setOnInsert': {
-                'uptime': 0,
-                'name': ""}
+                "last-seen": device['last-seen']}
             }
-            # TODO: calculate uptime
+            # calculate uptime
+            if uptime_enabled == 'true':
+                result = self.db['vlan_' + vlan].find_one({'mac':device['mac']})
+                if result is not None:
+                    uptime_step = int(round((datetime.fromtimestamp(device['last-seen']) - datetime.fromtimestamp(result['last-seen'])).total_seconds()/60))
+                    if uptime_step <= max_step:
+                        record_data['$inc'] = {'uptime':uptime_step}
+                else:
+                    record_data['$setOnInsert'] = {'uptime': 0,'name': ""}
+            else:
+                record_data['$setOnInsert'] = {'uptime': 0,'name': ""}
             records.append(pymongo.UpdateOne({'mac': device['mac']},
                             record_data, upsert=True)) # append records
         result = self.db['vlan_' + vlan].bulk_write(records, ordered=False) # execute bulk write

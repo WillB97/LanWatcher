@@ -117,3 +117,42 @@ response: {
     "success": True
 }, 201
 ```
+
+---
+
+## Scan Management
+
+URI: `/api/1.0/scans/<vlan>/manage`
+
+#### POST
+Toggle uptime being counted
+```
+args:{
+    "enabled": < boolean >
+},
+response:{
+    "success": True
+},201
+```
+#### PUT
+Set the maximum time between seeing nodes without downtime being recorded
+```
+args: {
+    "max-time": < int >
+},
+response: {
+    "success": True
+}, 201
+```
+#### DELETE
+Delete ip records in a time range
+```
+args: {
+    "older": < float(unix time) >,
+    "newer": < float(unix time) >,
+    "confirm": "true"
+},
+response: {
+    "deleted": < int >
+}, 201
+```

@@ -168,3 +168,63 @@ class host_endpoint(Resource):
         if result.deleted_count != 1:
             return {'success': False}, 500
         return {'success': True}, 201
+
+class manage_endpoint(Resource):
+    """configure scan parameters and perform bulk deletions"""
+
+    def __init__(self, db, auth):
+        self.db = db
+        self.auth_test = auth.auth_test
+    
+    def post(self, vlan):
+        postParse = reqparse.RequestParser()
+        postParse.add_argument('enabled', required=True, location='form',
+                                nullable=False, choices=["true", "false"])
+        if 'vlan_' + vlan not in self.db.collection_names(): # test vlan exists
+            return {'error': "vlan does not exist"}, 404
+        auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
+        if auth != True:
+            return auth
+        args = postParse.parse_args()
+        result = self.db['vlan_' + vlan].update_one({"meta": "true"},{"$set":{"uptime-count": args["enabled"]}})
+        if result.modified_count == 1:
+            return {"success": "true"},201
+        return {'error':'failed to update setting'},500
+
+    def put(self, vlan):
+        putParse = reqparse.RequestParser()
+        putParse.add_argument('max-time', required=True, location='form',
+                                nullable=False, type=int)
+        if 'vlan_' + vlan not in self.db.collection_names(): # test vlan exists
+            return {'error': "vlan does not exist"}, 404
+        auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
+        if auth != True:
+            return auth
+        args = putParse.parse_args()
+        result = self.db['vlan_' + vlan].update_one({"meta": "true"},{"$set":{"max-step": args["max-time"]}})
+        if result.modified_count == 1:
+            return {"success": "true"},201
+        return {'error':'failed to update setting'},500
+
+    def delete(self, vlan):
+        delParse = reqparse.RequestParser()
+        delParse.add_argument('older', required=False, location='form', type=float)
+        delParse.add_argument('newer', required=False, location='form', type=float)
+        delParse.add_argument('confirm', required=True, location='form',
+                                nullable=False, choices=['true']) # confirm deletion
+        if 'vlan_' + vlan not in self.db.collection_names(): # test vlan exists
+            return {'error': "vlan does not exist"}, 404
+        auth = self.auth_test(request.headers, request.cookies, vlan) # test auth
+        if auth != True:
+            return auth
+        args = delParse.parse_args()
+        find_filter = {"meta": {"$exists":False}}
+        time_filter = {}
+        if args['older'] is not None:
+            time_filter['$lt'] = args['older']
+        if args['newer'] is not None:
+            time_filter['$gt'] = args['newer']
+        if time_filter != {}:
+            find_filter = {'last-seen': time_filter}
+        result = self.db['vlan_' + vlan].delete_many(find_filter)
+        return {"deleted":result.deleted_count},201
