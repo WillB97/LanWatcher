@@ -25,6 +25,7 @@ auth = true
 sudo service mongodb restart
 # start temporary server
 python3 API_base.py
+sudo ./nginx_setup.sh
 ```
 
 ### Installation (Network Scanner):
@@ -38,6 +39,14 @@ pip3 install --user -U -r requirements.txt
 python3 create_key.py
 # run initial scan
 python3 nmap_scan.py
+crontab -e
+```
+
+In crontab:
+```
+# scan LAN every 5 minutes
+*/5 * * * * cd /home/will/LanWatcher && /usr/bin/python3 nmap_scan.py >/dev/null
+# edit path for the location of the git directory
 ```
 
 ### Usage (Network Scanner):
