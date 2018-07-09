@@ -49,8 +49,8 @@ EOF
 
 chown -R :www-data ../api 
 systemctl daemon-reload
-systemctl start lanwatcher
-systemctl enable lanwatcher
+systemctl start gunicorn
+systemctl enable gunicorn
 ln -s /etc/nginx/sites-available/lanwatcher /etc/nginx/sites-enabled
 rm /etc/nginx/sites-enabled/default
 nginx -s reload
