@@ -41,6 +41,7 @@ Indexed by `keyphrase`
 - view monitored vlans (get)
 - create a new vlans (post)
     + set vlan name
+
 `/api/1.0/scans/<vlan>`
 - view current ip, hostname pairs (get)
     + filter timeframe
@@ -50,29 +51,34 @@ Indexed by `keyphrase`
     + list with dict of data for each captured device
 - remove vlans (delete)
     + confirm deletion
+
 `/api/1.0/scans/<vlan>/ip/<ip host segment>`
 - lookup in-depth information by IP (get)
 - manually rename device by IP (put)
     + new name
 - remove device (delete)
     + confirm deletion
+
 `/api/1.0/scans/<vlan>/mac/<mac address>`
 - lookup in-depth information by MAC (get)
 - manually rename device by MAC (put)
     + new name
 - remove device (delete)
     + confirm deletion
+
 `/api/1.0/scans/<vlan>/host/<hostname>`
 - lookup in-depth information by hostname (get)
 - manually rename device by hostname (put)
     + new name
 - remove device (delete)
     + confirm deletion
+
 `/api/1.0/login`
 - generate auth token (post)
     + send user and password creds
 - alter user creds (put)
     + new password
+
 `/api/1.0/token`
 - list active API keys (get)
 - generate API keys (post)
